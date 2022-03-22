@@ -1,50 +1,58 @@
 const express = require('express');
 const {graphqlHTTP} = require('express-graphql');
-const {bodyParser} = require('body-parser')
+const BodyParser = require('body-parser')
+const jwt = require('jsonwebtoken')
 const cors = require('cors');
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true,
+    exposedHeaders: ['authorization']
+    
+}
+
 const schema = require('./schema');
 const connectDB = require('./db');
+
+
 const {authenticate} = require('./middleware/auth');
+
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions))
+app.use(BodyParser.json());
+app.use(BodyParser.urlencoded({ extended: true }));
+
+
+
 const dotenv =  require("dotenv");
-const { createJwtToken } = require('./utils/auth');
+
 dotenv.config();
 
 connectDB();
 
+
+
+
 app.use(authenticate)
 
-app.get('/',(req, res) => {
-    console.log(req.verifiedUser)
-    res.json({msg:"Welcome"})
-    
-}) 
-
-app.get("/authtest", (req, res) => {
-    res.json(
-        createJwtToken({
-            username: "jov boy",
-            email: "beegin@gmail.com",
-            password:"123456",
-            admin: false,
-        })
-    )
-
-})
-
- 
-   
 
 
-  
+
+
+
+
+
+
+
+
 app.use('/graphql',
  graphqlHTTP ({
     schema,
     graphiql:true,
+    headerEditorEnabled: true
     
 })
 );
+
 
 
 
